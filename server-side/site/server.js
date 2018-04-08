@@ -1,12 +1,16 @@
 var express = require('express'),
         cors = require('cors'),
 	marqdown = require('./marqdown.js'),
+	redis = require('redis'),
 	//routes = require('./routes/designer.js'),
 	//votes = require('./routes/live.js'),
 	//upload = require('./routes/upload.js'),
 	create = require('./routes/create.js'),
 	study = require('./routes/study.js'),
 	admin = require('./routes/admin.js');
+
+var client = redis.createClient(6379, '127.0.0.1', {})  
+client.auth('password');  
 
 var app = express();
 
@@ -34,6 +38,17 @@ app.post('/api/design/survey',
 		res.send( {preview: text} );
 	}
 );
+
+app.get('/api/feature_flag1', function(req, res) {  
+	client.exists("feature_flag", function(err, value) {  
+		if (value == 1) {   
+			res.status(200).send({'message': "feature flag 1"}); 
+		}  
+		else {  
+			res.send({'error':'This feature has been disabled by feature flag'});  
+		}  
+	});  
+}); 
 
 //app.get('/api/design/survey/all', routes.findAll );
 //app.get('/api/design/survey/:id', routes.findById );
